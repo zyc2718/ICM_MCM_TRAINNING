@@ -1,0 +1,50 @@
+\documentclass[12pt]{article}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+
+\title{Heliostat Field Annual Electricity Generation Maximization Algorithm}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{algorithm}[H]
+\caption{Heliostat Field Annual Electricity Generation Calculation}
+\label{alg:heliostat_optimization}
+\begin{algorithmic}[1]
+\Require $H_t$: Tower height, $M_i = (x_i, y_i, 6)$: Heliostat coordinates, $N$: Number of heliostats
+\Ensure $E_{\text{year}}$: Annual electricity generation, $\overline{P}_{\text{electric}}$: Average power
+
+\State Initialize $E_{\text{total}} \gets 0$
+\For{$n = 1$ to $365$} \Comment{Day loop}
+    \State $\delta \gets 23.45^\circ \times \sin\left( \frac{2\pi (n - 80)}{365} \right)$ 
+    \For{$t_{\text{solar}} = t_{\text{sunrise}}$ to $t_{\text{sunset}}$} \Comment{Time loop}
+    \State Calculate solar position $(\alpha_s, \gamma_s)$
+    \State $I_{\text{dni}} \gets \text{CalculateDNI}(\alpha_s)$
+    \State $P_{\text{field}} \gets 0$
+    \For{each heliostat $i$}
+        \State Calculate mirror normal $\mathbf{\hat{n}}_i$
+        \State $\eta_{\cos} \gets \mathbf{\hat{n}}_i \cdot \mathbf{i}$
+        \If{$\eta_{\cos} > 0$}
+            \State $P_i \gets I_{\text{dni}} \times A_m \times \rho \times \eta_{\cos} \times \eta_{\text{atm}}$
+            \State $P_{\text{field}} \gets P_{\text{field}} + P_i$
+        \EndIf
+    \EndFor
+    \State $E_{\text{total}} \gets E_{\text{total}} + P_{\text{field}} \times \Delta t \times \eta_{\text{th}}$
+    \EndFor
+\EndFor
+\State $\overline{P}_{\text{electric}} \gets E_{\text{total}} / 8760$
+\State \Return $E_{\text{total}}, \overline{P}_{\text{electric}}$
+\end{algorithmic}
+\end{algorithm}
+
+\end{document}

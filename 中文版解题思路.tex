@@ -1,0 +1,185 @@
+% !TEX program = xelatex
+\documentclass[12pt, a4paper]{article}
+\usepackage{ctex} % 中文支持
+\usepackage{amsmath, amssymb, amsthm} % 数学公式支持
+\usepackage{geometry} % 页面布局
+\usepackage{graphicx} % 图片支持
+\usepackage{booktabs} % 三线表
+\usepackage{enumitem} % 列表控制
+\usepackage{hyperref} % 超链接
+\usepackage{titlesec} % 标题格式
+\usepackage{fancyhdr} % 页眉页脚
+
+% 页面设置
+\geometry{left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm}
+
+% 章节标题格式
+\titleformat{\section}{\Large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}{\large\bfseries}{\thesubsection}{1em}{}
+
+% 文档信息
+\title{塔式太阳能光热电站年发电量最大化数学模型}
+\author{您的姓名}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+本文建立了塔式太阳能光热电站年发电量最大化的数学模型。模型涵盖了坐标系定义、反射几何、镜面定向、太阳位置计算、能量通量分析以及效率因子等多个方面，为电站的优化设计和性能评估提供了理论基础。
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+% ==================== 您提供的内容开始 ====================
+
+\section{坐标系统与变量定义}
+
+我们定义三维笛卡尔坐标系：
+- 原点 \( O \)：中央接收塔基座（定日镜场中心）
+- \( z \)-轴：垂直向上；接收器孔径中心位于 \( T = (0, 0, H_t) \)
+- 定日镜场：以原点为中心的圆形区域
+- 定日镜 \( i \)：中心坐标 \( M_i = (x_i, y_i, 6) \)，镜面尺寸 \( 6 \times 6 \, \text{m} \)
+
+太阳位置角：
+- 太阳高度角 \( \alpha_s(t) \)（地平线以上的仰角）
+- 太阳方位角 \( \gamma_s(t) \)（从北顺时针测量，0° 到 360°）
+
+定日镜定向角：
+- 仰角/倾斜角 \( \theta_i(t) \)（镜面法线与水平面夹角）
+- 方位角 \( \phi_i(t) \)（镜面法线在水平面投影，从北顺时针测量）
+
+\section{反射几何与镜面法向量}
+
+从地球指向太阳的单位向量（太阳方向向量）：
+\[
+\mathbf{\hat{s}}_{\text{sun}} = 
+\begin{bmatrix}
+\cos\alpha_s \sin\gamma_s \\
+\cos\alpha_s \cos\gamma_s \\
+\sin\alpha_s
+\end{bmatrix}
+\]
+（约定：\( x \)-轴向东，\( y \)-轴向北，\( z \)-轴向上）
+
+入射光线方向（从太阳到镜面）为 \( \mathbf{i} = -\mathbf{\hat{s}}_{\text{sun}} \)。
+
+反射光线方向（从镜面到目标）：
+\[
+\mathbf{\hat{r}} = \frac{T - M_i}{\| T - M_i \|}
+\]
+
+镜面单位法向量（使用反射定律，入射向量指向镜面）：
+\[
+\mathbf{\hat{n}} = \frac{\mathbf{i} + \mathbf{\hat{r}}}{\| \mathbf{i} + \mathbf{\hat{r}} \|}
+\]
+这确保了 \( \mathbf{\hat{r}} = \mathbf{i} - 2(\mathbf{i} \cdot \mathbf{\hat{n}})\mathbf{\hat{n}} \) 成立。
+
+从 \( \mathbf{\hat{n}} = (n_x, n_y, n_z) \)，镜面定向角为：
+\[
+\theta_i = \arcsin(n_z), \quad \phi_i = \operatorname{atan2}(n_x, n_y)
+\]
+（使用 atan2 获得正确象限，结果以弧度表示，从北顺时针）
+
+\section{有效面积与余弦损失}
+
+镜面面积：\( A_m = 36 \, \text{m}^2 \)。
+
+余弦效率（朝向太阳的投影面积）：
+\[
+\eta_{\cos} = \mathbf{\hat{n}} \cdot (-\mathbf{\hat{s}}_{\text{sun}}) = \mathbf{\hat{n}} \cdot \mathbf{i}
+\]
+这是镜面法线与入射阳光夹角的余弦值。
+
+\section{太阳位置模型}
+
+太阳赤纬（日数 \( n \)，1 到 365）：
+\[
+\delta \approx 23.45^\circ \times \sin\left( \frac{2\pi (n - 80)}{365} \right) \quad \text{（单位：度）}
+\]
+
+时角：
+\[
+h = 15^\circ \times (\text{太阳时} - 12)
+\]
+（太阳时 = 地方时 + 时差校正；为简化，时差可忽略）
+
+太阳高度角：
+\[
+\sin \alpha_s = \sin \varphi \, \sin \delta + \cos \varphi \, \cos \delta \, \cos h
+\]
+太阳方位角（从北顺时针）：
+\[
+\cos \gamma_s = \frac{\sin \delta \cos \varphi - \cos \delta \sin \varphi \cos h}{\cos \alpha_s}, 
+\quad \sin \gamma_s = \frac{\cos \delta \sin h}{\cos \alpha_s}
+\]
+\[
+\gamma_s = \operatorname{atan2}(\sin \gamma_s, \cos \gamma_s) \quad \text{（需要时调整象限）}
+\]
+
+\section{能量通量与效率因子}
+
+\textbf{法向直接辐照度 (DNI)} \( I_{\text{dni}}(t) \)：\\
+简化的晴空模型（如 Hottel 模型）或使用典型气象年 (TMY) 数据。
+
+\textbf{反射率}：\( \rho \approx 0.88 \)（典型镜面反射率）。
+
+\textbf{大气衰减}（镜面与接收器之间）：
+\[
+\eta_{\text{atm}} = a^{d}, \quad a \approx 0.99 \ \text{每公里}, \quad d = \| M_i - T \| / 1000 \ \text{（公里）}
+\]
+
+\textbf{截断效率} \( \eta_{\text{trunc}} \)：反射锥进入接收器孔径的比例。取决于镜面形状、瞄准、距离和接收器尺寸。简化处理：如果接收器完全捕获反射光束，\( \eta_{\text{trunc}} = 1 \)；否则通过锥截计算。
+
+\textbf{遮挡/阴影损失} \( \eta_{\text{block}} \)：此处忽略（=1）以简化，但在详细布局优化中必须建模。
+
+定日镜 \( i \) 的瞬时反射功率：
+\[
+P_i(t) = I_{\text{dni}}(t) \cdot A_m \cdot \rho \cdot \eta_{\cos} \cdot \eta_{\text{atm}} \cdot \eta_{\text{trunc}}
+\]
+
+场总热功率：
+\[
+P_{\text{field}}(t) = \sum_{i=1}^{N} P_i(t)
+\]
+
+\section{年发电量计算}
+
+热电转换效率：\( \eta_{\text{th}} \approx 0.35 \)。
+
+年发电量：
+\[
+E_{\text{year}} = \eta_{\text{th}} \int_{\text{year}} P_{\text{field}}(t) \, dt
+\]
+在白天（\( \alpha_s > 0 \)）且定日镜不在维护/夜间时段积分。
+
+年平均电功率：
+\[
+\overline{P}_{\text{electric}} = \frac{E_{\text{year}}}{8760 \ \text{小时}}
+\]
+
+\section{最大化方法}
+
+给定固定的定日镜位置，唯一控制是瞄准定律（已由反射几何设定）。\\
+年输出最大化通过以下方式实现：
+- 优化布局以最小化平均衰减和余弦损失
+- 通过适当的接收器尺寸确保 \( \eta_{\text{trunc}} \approx 1 \)
+- 在此模型中，我们计算所有 \( t \) 的 \( P_{\text{field}}(t) \)，然后积分
+
+一旦坐标和瞄准策略固定，就没有额外的自由度。
+
+% ==================== 您提供的内容结束 ====================
+
+\section*{模型验证与讨论}
+
+该模型为塔式太阳能电站的优化设计提供了完整的数学框架。在实际应用中，还需要考虑：
+\begin{itemize}
+    \item 定日镜场的布局优化算法
+    \item 接收器的热损失模型
+    \item 实际运行中的维护周期和效率衰减
+    \item 不同气候条件下的适应性分析
+\end{itemize}
+
+\end{document}
